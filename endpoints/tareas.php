@@ -23,18 +23,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     echo json_encode($data);
+    
 } elseif ($_SERVER["REQUEST_METHOD"] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
 
-    $id = null;
-    $titulo = $input['titulo'];
+    $titulo = trim($input['titulo']);
     $descripcion = $input['descripcion'];
     $estado = $input['estado'];
     $fecha_creacion = $input['fecha_creacion'];
     $fecha_vencimiento = $input['fecha_vencimiento'];
 
+
+    if ($titulo === null || $titulo === '') {
+        http_response_code(400);
+        echo json_encode(["Error" => "No se puede agregar una tarea sin título"]);
+        exit;
+    }
+
     $sql  = "INSERT INTO tareas (titulo, descripcion, estado, fecha_creacion, fecha_vencimiento) 
-        VALUES ('$titulo', '$descripcion', '$estado', '$fecha_creacion', '$fecha_vencimiento')";
+             VALUES ('$titulo', '$descripcion', '$estado', '$fecha_creacion', '$fecha_vencimiento')";
 
     $query = mysqli_query($con, $sql);
 
@@ -45,7 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         http_response_code(500);
         echo json_encode(["Error" => "Error al crear Tarea"]);
     }
-} elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+}
+
+elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
     $input = json_decode(file_get_contents('php://input'), true);
 
     $id = $_GET['id'];
